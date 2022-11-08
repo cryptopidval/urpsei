@@ -1,8 +1,5 @@
 import json
 
-with open("../Selenium IDE /test.json") as file:
-    t = json.load(file)
-
 
 preferences_decode = {
     "1": "xpath",
