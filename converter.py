@@ -1,6 +1,6 @@
 import json
 
-
+#creating dictionary for selecting selector
 preferences_decode = {
     "1": "xpath",
     "2": "id",
@@ -9,14 +9,17 @@ preferences_decode = {
     "5": "linkText"
 }
 
+#code to wait until page loading
 webdriver_wait_code = "WebDriverWait(driver, 15).until(move_to_element_to_be_clickable(({by}, '{value}')))\n"
 
+#convert string to int
 def int_convertor(to_convert):
     try:
         return int(to_convert)
     except Exception:
         return False
 
+#convert selector name to its selenium version
 def target_processor(target: str):
     by = "By."
     if target.startswith("name="):
@@ -33,29 +36,32 @@ def target_processor(target: str):
     return [by, value]
 
 
+#generate find_element code from target
 def target_to_command(target: str):
     by, value = target_processor(target)
-    value=value.replace('\'','\\\'')
+    value=value.replace('\'','\\\'') #prevent slashes from closing quotes
     return f"driver.find_element({by}, '{value}')"
 
 
+
+#generate code for one command
 def command_to_code(command_dict: dict, use_default: bool, preferences: str, manual_select=None):
     command = command_dict["Command"]
     value = command_dict["Value"]
-    value = value.replace('\'', '\\\'')
+    value = value.replace('\'', '\\\'') #prevent slashes from closing quotes
     if manual_select==None:
         target = get_target(command_dict, use_default, preferences)
     final_command = ""
 
     if command == "open":
-        target = target.replace('\'', '\\\'')
+        target = target.replace('\'', '\\\'') #prevent slashes from closing quotes
         final_command = f"driver.get('{target}')"
     elif command == "type":
         if manual_select!=None:
             target=manual_select
         by, value_ = target_processor(target)
-        value_ = value_.replace('\'', '\\\'')
-        target = target.replace('\'', '\\\'')
+        value_ = value_.replace('\'', '\\\'') #prevent slashes from closing quotes
+        target = target.replace('\'', '\\\'') #prevent slashes from closing quotes
         final_command = f"{webdriver_wait_code.format(by=by, value=value_)}" \
                         f"element={target_to_command(target)}\n" \
                         f"element.clear()\n" \
@@ -64,8 +70,8 @@ def command_to_code(command_dict: dict, use_default: bool, preferences: str, man
         if manual_select!=None:
             target=manual_select
         by, value = target_processor(target)
-        value = value.replace('\'', '\\\'')
-        target = target.replace('\'', '\\\'')
+        value = value.replace('\'', '\\\'') #prevent slashes from closing quotes
+        target = target.replace('\'', '\\\'') #prevent slashes from closing quotes
         final_command = f"{webdriver_wait_code.format(by=by, value=value)}" \
                         f"{target_to_command(target)}.click()"
     return final_command
@@ -87,7 +93,7 @@ def get_target(command: dict, use_default: bool, preferences: str):
             target = command["Target"]
         return target
 
-
+#importing requirements from selenium and defining function that helps to wait until page loads
 result = '''#Generated using convertor by t.me/cryptopidval
 from selenium import webdriver
 from selenium.webdriver.common.by import By
